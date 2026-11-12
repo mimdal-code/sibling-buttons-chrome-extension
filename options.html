@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sibling Buttons — Settings</title>
+<link rel="stylesheet" href="options.css">
+</head>
+<body>
+<header>
+  <h1>Sibling Buttons</h1>
+  <p class="muted">Pick a site on the left. Configure its buttons on the right.</p>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <h2>Sites</h2>
+      <button id="add-site-btn" class="primary small">+ Add</button>
+    </div>
+    <ul id="site-list" class="site-list"></ul>
+    <p id="sidebar-empty" class="hint" hidden>No sites yet. Click “+ Add”.</p>
+  </aside>
+
+  <main class="main">
+    <div id="main-empty" class="card empty">
+      <h2>No site selected</h2>
+      <p class="muted">Pick a site from the left, or add a new one.</p>
+    </div>
+
+    <div id="main-site" hidden>
+      <section class="card">
+        <div class="site-head">
+          <h2 class="origin"></h2>
+          <label class="switch"><input type="checkbox" class="enabled"> enabled</label>
+          <button class="danger small remove-site">Remove site</button>
+        </div>
+        <label class="field">
+          <span class="field-label">URL pattern filter (optional)</span>
+          <input class="url-pattern" type="text" placeholder="https://example.com/detail/*">
+        </label>
+        <p class="hint">Glob. Leave empty for every page on the origin.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Buttons</h2>
+          <button class="primary small" id="new-button-btn">+ New button</button>
+        </div>
+        <div class="buttons"></div>
+        <p class="hint empty-buttons" hidden>No buttons yet. Click “+ New button” or pick a preset below.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Presets</h2>
+          <span class="muted small">Click to prefill the editor below</span>
+        </div>
+        <div class="presets" id="presets"></div>
+      </section>
+
+      <section class="card" id="editor-card" hidden>
+        <div class="card-head">
+          <h2 id="editor-title">New button</h2>
+          <button class="small" id="cancel-edit-btn">Cancel</button>
+        </div>
+        <form id="button-form">
+          <div class="grid">
+            <label class="field span2">
+              <span class="field-label">Target selector (CSS or XPath)</span>
+              <input name="target" type="text" placeholder='a[href$="/support"]  or  /html/body/…/a' required>
+            </label>
+            <div class="test-row span2">
+              <button type="button" id="test-target-btn" class="small">Test on current tab</button>
+              <span id="test-result" class="muted small">—</span>
+            </div>
+
+            <label class="field">
+              <span class="field-label">Position</span>
+              <select name="position">
+                <option value="after">after</option>
+                <option value="before">before</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Label</span>
+              <input name="label" type="text" placeholder="GitHub" required>
+            </label>
+
+            <div class="field span2">
+              <span class="field-label">Style preset</span>
+              <div class="css-presets" id="css-presets"></div>
+            </div>
+
+            <label class="field span2">
+              <span class="field-label">Button CSS (editable)</span>
+              <textarea name="css" rows="3" placeholder="Leave empty to use the selected preset, or edit the preset text here."></textarea>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Action</span>
+              <select name="actionType">
+                <option value="link">Link</option>
+                <option value="js">JS (bookmarklet)</option>
+              </select>
+            </label>
+
+            <label class="field action-link-field">
+              <span class="field-label">URL</span>
+              <input name="actionUrl" type="text" placeholder="https://github.com">
+            </label>
+            <label class="field action-link-field inline">
+              <span class="field-label">New tab</span>
+              <input name="actionNewTab" type="checkbox" checked>
+            </label>
+
+            <label class="field span2 action-js-field" hidden>
+              <span class="field-label">JS code (runs in page MAIN world)</span>
+              <textarea name="actionCode" rows="4" placeholder=""></textarea>
+            </label>
+          </div>
+
+          <div class="row actions">
+            <button type="button" class="small" id="preview-btn">Preview on current tab</button>
+            <button type="button" class="small" id="clear-preview-btn">Clear preview</button>
+            <span class="spacer"></span>
+            <button type="submit" class="primary" id="save-btn">Save button</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+
+<template id="site-item-tpl">
+  <li class="site-item">
+    <button class="site-item-btn">
+      <span class="site-item-origin"></span>
+      <span class="site-item-count"></span>
+    </button>
+  </li>
+</template>
+
+<template id="button-row-tpl">
+  <div class="button-row">
+    <strong class="b-label"></strong>
+    <span class="b-meta muted"></span>
+    <span class="b-health" title="Last resolve status">—</span>
+    <button class="small edit-button">Edit</button>
+    <button class="danger small remove-button">Remove</button>
+  </div>
+</template>
+
+<template id="preset-tpl">
+  <button class="preset">
+    <span class="preset-name"></span>
+    <span class="preset-desc muted small"></span>
+  </button>
+</template>
+
+<script src="options.js"></script>
+</body>
+</html>

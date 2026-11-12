@@ -1,0 +1,105 @@
+name: Release Chrome Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify manifest version matches tag
+        run: |
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          TAG_VERSION="${{ steps.get_version.outputs.VERSION }}"
+          echo "manifest.json version: $MANIFEST_VERSION"
+          echo "tag version:          $TAG_VERSION"
+          if [ "$MANIFEST_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::manifest.json version ($MANIFEST_VERSION) does not match tag ($TAG_VERSION)"
+            exit 1
+          fi
+
+      - name: Package extension
+        id: package
+        run: |
+          # Derive extension name from manifest, fall back to repo name.
+          EXT_NAME=$(node -p "
+            const m = require('./manifest.json');
+            (m.short_name || m.name || '')
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/^-+|-+$/g, '')
+          ")
+          if [ -z "$EXT_NAME" ]; then
+            EXT_NAME="${GITHUB_REPOSITORY##*/}"
+          fi
+          VERSION="${{ steps.get_version.outputs.VERSION }}"
+          ZIP_NAME="${EXT_NAME}-${VERSION}.zip"
+          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_OUTPUT"
+
+          # Collect every file the extension needs, discovered from the tree.
+          # Exclude dev/CI/VCS files and anything that shouldn't ship.
+          FILES=$(git ls-files \
+            | grep -vE '^\.(git|github)/' \
+            | grep -vE '(^|/)node_modules/' \
+            | grep -vE '(^|/)\.DS_Store$' \
+            | grep -vE '(^|/)\.gitignore$' \
+            | grep -vE '(^|/)\.gitattributes$' \
+            | grep -vE '(^|/)\.eslintrc' \
+            | grep -vE '(^|/)\.prettierrc' \
+            | grep -vE '(^|/)package(-lock)?\.json$' \
+            | grep -vE '(^|/)yarn\.lock$' \
+            | grep -vE '(^|/)pnpm-lock\.yaml$' \
+            | grep -vE '(^|/)\.vscode/' \
+            | grep -vE '(^|/)\.idea/' \
+            | grep -vE '(^|/)\.editorconfig$' \
+            | grep -vE '\.md$' \
+            | grep -vE '(^|/)LICENSE' \
+            | grep -vE '(^|/)\.env' \
+            | grep -vE '(^|/)screenshots?/' \
+            | grep -vE '(^|/)docs?/' \
+            || true)
+
+          if [ -z "$FILES" ]; then
+            echo "::error::No files found to package"
+            exit 1
+          fi
+
+          if ! echo "$FILES" | grep -qx 'manifest.json'; then
+            echo "::error::manifest.json must be at the repo root"
+            exit 1
+          fi
+
+          echo "Packaging files:"
+          echo "$FILES"
+          echo ""
+
+          # Write file list to a temp file so zip reads it as -@
+          printf '%s\n' "$FILES" > /tmp/zipfiles.txt
+          zip -r "$ZIP_NAME" -@ < /tmp/zipfiles.txt
+
+          echo ""
+          echo "Archive contents:"
+          unzip -l "$ZIP_NAME"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.ZIP_NAME }}
+          .github\manual-release/*.crx
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

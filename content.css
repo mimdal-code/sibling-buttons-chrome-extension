@@ -1,0 +1,16 @@
+.sibling-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  font: 12px/1.4 system-ui, -apple-system, Segoe UI, sans-serif;
+  padding: 5px 10px; margin: 0 4px; cursor: pointer;
+  border-radius: 6px; border: 1px solid #d0d7de; background: #f6f8fa; color: #24292f;
+  vertical-align: middle;
+}
+.sibling-btn:hover { background: #eaeef2; }
+.sibling-btn-preview { outline: 2px dashed #0969da; outline-offset: 1px; }
+.sibling-flash {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #24292f; color: #fff; padding: 8px 14px; border-radius: 8px;
+  opacity: 0; transition: opacity .2s, transform .2s; z-index: 2147483647;
+  font: 12px/1.4 system-ui, sans-serif; pointer-events: none; max-width: 80vw;
+}
+.sibling-flash.show { opacity: 1; transform: translateX(-50%) translateY(0); }
