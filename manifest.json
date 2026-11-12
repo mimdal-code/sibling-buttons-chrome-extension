@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Sibling Buttons",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Insert buttons before/after any element on any site. CSS or XPath target, link or JS action.",
   "permissions": ["scripting", "storage", "tabs"],
   "optional_host_permissions": ["*://*/*"],
