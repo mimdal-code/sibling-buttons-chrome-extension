@@ -96,8 +96,10 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ steps.package.outputs.ZIP_NAME }}
-          .github/manual-release/*.crx
+          files: |
+            ${{ steps.package.outputs.ZIP_NAME }}
+            .github/manual-release/*.crx
+            checksums.txt
           generate_release_notes: true
           draft: false
           prerelease: false
