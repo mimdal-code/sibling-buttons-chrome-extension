@@ -97,7 +97,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ steps.package.outputs.ZIP_NAME }}
-          .github\manual-release/*.crx
+          .github/manual-release/*.crx
           generate_release_notes: true
           draft: false
           prerelease: false
